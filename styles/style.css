@@ -1,0 +1,24 @@
+.products {
+    width: 600px;
+}
+.productsTitile {
+    margin-left: 5px;
+}
+.productsConditions {
+    margin-left: 15px;
+}
+.product {
+    margin-bottom: 10px;
+}
+.disableProduct {
+    border: 1px solid #d3d3d3;
+    border-left: 10px solid #d3d3d3;
+}
+.selectProduct {
+    border: 1px solid #008000;
+    border-left: 10px solid #008000;
+}
+.product p {
+    margin-top: 0.1em;
+    margin-bottom: 0.1em;
+}
