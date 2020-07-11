@@ -1,24 +1,47 @@
-.products {
-    width: 600px;
+.settings_products {
+    max-width: 640px;
 }
-.productsTitile {
+.products {
+    max-width: 600px;
+}
+.products_titile {
     margin-left: 5px;
 }
-.productsConditions {
+.products_conditions {
     margin-left: 15px;
 }
 .product {
     margin-bottom: 10px;
 }
-.disableProduct {
+.disable_product {
     border: 1px solid #d3d3d3;
     border-left: 10px solid #d3d3d3;
 }
-.selectProduct {
+.select_product {
     border: 1px solid #008000;
     border-left: 10px solid #008000;
 }
 .product p {
     margin-top: 0.1em;
     margin-bottom: 0.1em;
+}
+
+.vue-slider-loan {
+    margin-left: 50px;
+}
+
+.available_product {
+    float: left; /* Обтекание справа */ 
+    width: 50%; /* Ширина текстового блока */ 
+}
+
+.payment_chedule {
+    float: left; /* Обтекание справа */ 
+    width: 50%; /* Ширина текстового блока */ 
+    text-align: left; /* Выравнивание по правому краю */ 
+}
+
+td, th {
+    padding: 3px; /* Поля вокруг содержимого таблицы */
+    border: 1px solid #d3d3d3; /* Параметры рамки */
 }

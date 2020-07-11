@@ -3,105 +3,92 @@
 
 <head>
   <title>Credit calculator</title>
-  <script src="https://unpkg.com/vue"></script>
-  <link href="styles/style.css" rel="stylesheet">
 </head>
 
 <body>
 
-  <h2>Доступные продукты</h2>
+  <div id="app">
 
-  <div id="products">
-    <products class="products"
-      v-for="product in products" 
-      v-bind:id="product.id" 
-      v-bind:mindays="product.mindays" 
-      v-bind:maxdays="product.maxdays" 
-      v-bind:minsumm="product.minsumm" 
-      v-bind:maxsumm="product.maxsumm" 
-      v-bind:description="product.description" 
-      v-bind:rate="product.rate" 
-      v-bind:stepdays="product.stepdays" 
-      v-bind:stepsumm="product.stepsumm" 
-      v-bind:type="product.type" 
-      v-bind:name="product.name">
-    </products>
+    <div class='available_product'>
+      <h2>Доступные продукты</h2>
+      <div style="clear: left"></div>
+      <div id="products">
+        <products class="products"
+          v-for="product in products" 
+          v-bind:key="product.id"
+          v-bind:id="product.id"
+          v-bind:mindays="product.mindays" 
+          v-bind:maxdays="product.maxdays" 
+          v-bind:minsumm="product.minsumm" 
+          v-bind:maxsumm="product.maxsumm" 
+          v-bind:description="product.description" 
+          v-bind:rate="product.rate" 
+          v-bind:stepdays="product.stepdays" 
+          v-bind:stepsumm="product.stepsumm" 
+          v-bind:type="product.type" 
+          v-bind:name="product.name">
+        </products>
+      </div>
+      <div id="settings_products" class="settings_products">
+        <h2>Параметры займа / {{ curSumm }} рублей на {{ getLoadPeriod(sliderDays.curDays) }}</h2>
+
+        <h3>Сумма ({{ options.min }} рублей - {{ options.max }} рублей)</h2>
+        <vue-slider
+          ref="slider"
+          v-model="curSumm"
+          v-bind="options">
+        </vue-slider>
+
+        <loan_period 
+          v-bind:mindays="sliderDays.options.min"
+          v-bind:maxdays="sliderDays.options.max"
+        ></loan_period>
+        <vue-slider
+          ref="slider"
+          v-model="sliderDays.curDays"
+          v-bind="sliderDays.options">
+        </vue-slider>
+
+        <p>Вы берете <b>{{ curSumm }}</b> рублей на <b>{{ getLoadPeriod(sliderDays.curDays) }}</b> под <b>{{ Number(curRate * 100).toFixed(2) }}% в сутки</b></p>
+        <p>Вы возвращаете <b>{{ getRefundPayments() }}</b> по <b>{{ getAmountPayment() }}</b> {{ getNameEvery() }} <b>{{ getIntervalPayments() }}</b> до <b>{{ getLastDatePayment() }}</b></b></p>
+      </div>
+    </div>
+
+    <div class='payment_chedule'>
+      <h2 >График платежей</h2>
+      <div id="payment_chedule_table">
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th>Дата платежа</th>
+                <th>Сумма платежа, руб</th>
+                <th>Остаток долга, руб</th>
+              </tr>
+            </thead>
+            <tbody>
+            <tr v-for="(payment, index) in payment_schedule"
+              v-bind:key="index"
+              v-bind:date="payment.date"
+              v-bind:amount="payment.amount"
+              v-bind:remains="payment.remains">
+              <td>{{ payment.date }}</td>
+              <td>{{ payment.amount }}</td>
+              <td>{{ payment.remains }}</td>
+            </tr>
+            </tbody>
+          </table>
+      </div>
+    </div>
+    <div style="clear: left"></div>
   </div>
 
-  <script>
-    Vue.component("products", {
-      props: ['id', 'name', 'mindays', 'maxdays', 'minsumm', 'description', 'maxsumm', 'rate', 'stepdays', 'type'],
-      template: `<div v-on:click="selectProduct" class="product" v-bind:class="{selectProduct: getCurrentProduct(id) == id, disableProduct: getCurrentProduct(id) != id}">
-        <p class="productsTitile">{{ name }} / <span v-html="description">{{ description }}</span></p>
-        <div class="productsConditions">
-          <p>от {{ minsumm }} до {{ maxsumm }} рублей</p> 
-          <p>от {{ mindays }} до {{ maxdays }} дней</p> 
-          <p>под {{ rate }}% в сутки</p>
-          <p v-if="type == 'PDL'">один платеж в конце срока</p>
-          <p v-else-if="type == 'IL'">{{getMessagePaymentSchedule(stepdays)}}</p>
-        </div>
-      </div>`,
-      methods: {
-        selectProduct: function (event) {
-          this.$parent.currentProduct = this.id
-        },
-        getCurrentProduct: function (event) {
-          return this.$parent.currentProduct
-        },
-        getMessagePaymentSchedule: function (days) {
-          function num2str(n, text_forms) {  
-              n = Math.abs(n) % 100; var n1 = n % 10;
-              if (n > 10 && n < 20) { return text_forms[2]; }
-              if (n1 > 1 && n1 < 5) { return text_forms[1]; }
-              if (n1 == 1) { return text_forms[0]; }
-              return text_forms[2];
-          }
-          if (!days) return
-          let weeks = days / 7;
-          let msg = 'аннуитетные платежи раз в '
-          if ( Number.isInteger(weeks)) {
-            return msg + weeks  + ' ' + num2str(weeks, ['неделя', 'недели', 'недель'])
-          }
-          return msg + days + ' ' + num2str(days, ['день', 'дня', 'дней'])
-        }
-      }
-    });
-
-    let app = new Vue({
-      el: "#products",
-      data: {
-        products: [],
-        currentProduct: 0
-      },
-      created: function () {
-        let vm = this;
-        fetch("https://raw.githubusercontent.com/imhuman/test/master/ed.json")
-          .then(function (response) {
-            return response.json();
-          })
-          .then(function (data) {
-
-            function getProducts(data) {
-              let products = [];
-              for (let i = 0; i < data.length; i++) {
-                if (data[i].products && data[i].minsumm && data[i].maxsumm && data[i].stepsumm) {
-                  for (let j = 0; j < data[i].products.length; j++) {
-                    let product = data[i].products[j];
-                    product['minsumm'] = data[i].minsumm
-                    product['maxsumm'] = data[i].maxsumm
-                    product['stepsumm'] = data[i].stepsumm
-                    products.push(product)
-                  }
-                }
-              }
-              return products
-            }
-
-            vm.products = getProducts(data)
-          });
-      }
-    });
-  </script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vue-slider-component@latest/theme/default.css">
+  <link href="styles/style.css" rel="stylesheet">
+  <script src="https://unpkg.com/vue"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vue-slider-component@latest/dist/vue-slider-component.umd.min.js"></script>
+  <script src="js/products.js"></script>
+  <script src="js/load_period.js"></script>
+  <script src="js/app.js"></script>
 </body>
 
 </html>
